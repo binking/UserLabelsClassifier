@@ -22,12 +22,12 @@ OUTER_MYSQL = {
 }
 QCLOUD_MYSQL = {
     'host': '10.66.110.147',
-    'port': 3306, 
-    'db': 'web',
-    'user': 'webcrawler',
+    'port': 3306,
+    'db': 'webcrawler',
+    'user': 'web',
     'passwd': 'Crawler20161231',
     'charset': 'utf8',
-    'connect_timeout': 20, 
+    'connect_timeout': 20,
 }
 
 def load_train_dataset():
@@ -46,12 +46,12 @@ def load_train_dataset():
     return topics, labels
 
 def get_content_by_title(title):
-    conn = mdb.connect(**QCLOUD_MYSQL)
+    conn = mdb.connect(**OUTER_MYSQL)
     cursor = conn.cursor()
     select_topic_sql = """
         SELECT cvt.content
         FROM topicinfo t JOIN cache_v_topiccontent AS cvt
-        ON cvt.id=t.id 
+        ON cvt.id=t.id
         WHERE t.title='{}' limit 1
     """.format(title)
     status = cursor.execute(select_topic_sql)
@@ -77,14 +77,14 @@ def main():
     size = len(train_tags)
     try:
         for i in range(size):
-            # print train_tags[i], 
+            # print train_tags[i],
             content = get_content_by_title(train_tags[i])
             dataset.append([train_tags[i], content, labels[i]])
             # print len(content)
     except (Exception, KeyboardInterrupt) as e:
         traceback.print_exc()
     save_dataset_as_csv('init_dataset.csv', dataset)
-    
+
 
 if __name__ == '__main__':
     main()
