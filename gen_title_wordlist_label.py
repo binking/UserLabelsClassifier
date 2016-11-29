@@ -66,11 +66,14 @@ def main():
     dataset = []
     train_tags, labels = load_train_dataset()
     size = len(train_tags)
-    for i in range(size):
-    	print train_tags[i], 
-        content = get_content_by_title(train_tags[i])
-        dataset.append([train_tags[i], content, labels[i]])
-        print len(content)
+    try:
+	    for i in range(size):
+	    	print train_tags[i], 
+	        content = get_content_by_title(train_tags[i])
+	        dataset.append([train_tags[i], content, labels[i]])
+	        print len(content)
+	except (Exception, KeyboardInterrupt) as e:
+		traceback.print_exc()
     save_dataset_as_csv('init_dataset.csv', dataset)
     
 
