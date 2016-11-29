@@ -56,10 +56,10 @@ def get_content_by_title(title):
 
 def save_dataset_as_csv(filename, list_of_records):
     with open(filename, 'w') as fw:
-    	writer = csv.writer(fw, delimiter='|')
-    	writer.writerow(['Title', 'Content', 'Label'])
-    	for record in list_of_records:
-    	    writer.writerow(record)
+        writer = csv.writer(fw, delimiter='|')
+        writer.writerow(['Title', 'Content', 'Label'])
+        for record in list_of_records:
+            writer.writerow(record)
 
 
 def main():
@@ -67,13 +67,13 @@ def main():
     train_tags, labels = load_train_dataset()
     size = len(train_tags)
     try:
-	    for i in range(size):
-	    	print train_tags[i], 
-	        content = get_content_by_title(train_tags[i])
-	        dataset.append([train_tags[i], content, labels[i]])
-	        print len(content)
-	except (Exception, KeyboardInterrupt) as e:
-		traceback.print_exc()
+        for i in range(size):
+            print train_tags[i], 
+            content = get_content_by_title(train_tags[i])
+            dataset.append([train_tags[i], content, labels[i]])
+            print len(content)
+    except (Exception, KeyboardInterrupt) as e:
+        traceback.print_exc()
     save_dataset_as_csv('init_dataset.csv', dataset)
     
 
