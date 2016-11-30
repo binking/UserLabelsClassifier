@@ -47,7 +47,7 @@ def load_train_dataset():
     return topics, labels
 
 def get_content_by_title(title):
-    conn = mdb.connect(**OUTER_MYSQL)
+    conn = mdb.connect(**QCLOUD_MYSQL)
     cursor = conn.cursor()
     select_topic_sql = """
         SELECT cvt.content
