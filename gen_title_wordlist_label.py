@@ -5,6 +5,7 @@ import json
 import csv
 import traceback
 import MySQLdb as mdb
+from datetime import datetime as dt
 from collections import Counter
 
 reload(sys)
@@ -58,7 +59,7 @@ def get_content_by_title(title):
     # import ipdb; ipdb.set_trace()
     record = cursor.fetchone()
     if status:
-        return record[0]
+        return record[0].replace('\n', '')
     cursor.close()
     conn.close()
     return ''
@@ -77,13 +78,13 @@ def main():
     size = len(train_tags)
     try:
         for i in range(size):
-            # print train_tags[i],
+            print train_tags[i],
             content = get_content_by_title(train_tags[i])
             dataset.append([train_tags[i], content, labels[i]])
-            # print len(content)
+            print len(content)
     except (Exception, KeyboardInterrupt) as e:
         traceback.print_exc()
-    save_dataset_as_csv('init_dataset.csv', dataset)
+    save_dataset_as_csv('init_dataset_%s.csv' % (dt.now().strftime('%Y-%m-%d-%H:%M:%S')), dataset)
 
 
 if __name__ == '__main__':
