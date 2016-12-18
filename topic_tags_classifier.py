@@ -37,7 +37,7 @@ def load_dataset(filename):
     """
     data_frame = sframe.SFrame()
     train_data = sframe.SFrame()
-    dataset = data_frame.read_csv(filename, delimiter='|', header=False)
+    dataset = data_frame.read_csv(filename, delimiter='|', header=False, nrows=100)
     train_data['topics'] = dataset['X1']
     train_data['content'] = dataset['X2']
     return train_data, dataset['X3']
@@ -46,10 +46,14 @@ def save_sparse_csr(filename,array):
     np.savez(filename,data = array.data ,indices=array.indices,
              indptr =array.indptr, shape=array.shape )
 
+
 def load_sparse_csr(filename):
     loader = np.load(filename)
-    return csr_matrix((  loader['data'], loader['indices'], loader['indptr']),
-                         shape = loader['shape'])
+    return csr_matrix( (loader['data'], loader['indices'], loader['indptr']), loader['shape'])
+
+def save_word_count(filename, bag_of_words):
+    pass
+
 def main():
 	filename = './user_labels_simple_dataset.csv'  # 3428 lines
 	train_data, labels = load_dataset(filename)
