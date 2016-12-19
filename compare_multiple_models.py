@@ -68,14 +68,15 @@ def load_tokens_from_file(filename):
     labels = []
     data_frame = pd.read_csv(filename, delimiter=',') # , nrows=5000)  # sample the whole: df.sample(frac=1)
     random_frame = data_frame.reindex(np.random.permutation(data_frame.index))
+    del data_frame
     for i, doc in enumerate(random_frame['content']):
         if isinstance(doc, float) and random_frame['class'][i] == '其他'.decode('utf8'):
             print i, '-th doc ignored'
             continue
         docs.append(tokenize_text(doc))
         labels.append(random_frame['class'][i])
-        if i > 9999:
-            break
+        # if i > 9999:
+        #     break
     # import ipdb; ipdb.set_trace()  
     return docs, np.array(labels)
 
@@ -90,14 +91,14 @@ def give_me_classifier(X_train, y_train, X_test, y_test, clf):
         train_acc = np.sum(y_train==train_pred)*1.0 / len(train_pred)
         print 'Train Accuracy is %2.3f' % (train_acc * 100)
         train_time = time.time() - t0
-        print "train time: %0.3fs" % train_time 
+        print "train time: %0.3f seconds" % train_time 
 
         t0 = time.time()
         test_pred = clf.predict(X_test)
         test_acc = np.sum(y_test==test_pred)*1.0 / len(test_pred)
         print "Test Accuracy is %2.3f" % (test_acc * 100)
         test_time = time.time() - t0
-        print "test time:  %0.3fs" % test_time
+        print "test time:  %0.3f seconds" % test_time
 
         return '%s' % clf, train_acc, test_acc, train_time, test_time
     except Exception as e:
@@ -151,8 +152,9 @@ def main():
     print "=" * 80
     for res in results:
         if res:
-            print 'Classifier: %s, its train accuracy = %2.3f, test accuracy = %2.3f' % (res[0], res[1], res[2])
-            print 'And it cost %f for training and cost %f for testing.' % (res[3], res[4])
+            print 'Classifier: %s:' % res[0]
+            print 'its train accuracy = %2.3f, test accuracy = %2.3f ' % (res[1], res[2])
+            print 'and it cost %f seconds for training and cost %f seconds for testing.' % (res[3], res[4])
     
 
 if __name__=='__main__':
