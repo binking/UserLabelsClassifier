@@ -46,28 +46,35 @@ def format_bow_csr_matrix(docs):
     index2word = {}
     print 'Format sparse matrix ...'
     data = []; indices = []; indptr = [0]
+    idf_index2freq = {}
     for doc in docs:
         # print 'Cooking text'
         for token in doc:
             index = index2word.setdefault(token, len(index2word))  # how many words in vocabulary
+            idf_index2freq[index] = idf_index2freq.get(index, 0) + 1
             indices.append(index)
             data.append(1)
         indptr.append(len(indices))  # len(indices) means hwo many nnz in the col
-
-    return csr_matrix( (data, indices, indptr), dtype=int)
+    tf_csr_matrix = csr_matrix( (data, indices, indptr), dtype=int)
+    idf_vector = np.array([freq for freq, _ in sorted(idf_index2freq, key=lambda x:x[0])])
+    print idf_vector
+    return tf_csr_matrix, idf_vector
 
 def load_tokens_from_file(filename):
     docs = []
     print 'Loading data set ...'
     # <class 'pandas.core.frame.DataFrame'>
     # <class 'pandas.core.series.Series'> to <type 'numpy.ndarray'> : labels.values
-    data_frame = pd.read_csv(filename, delimiter='|', header=None, names=['topic', 'content', 'label'])  # , nrows=100)
-    for doc in data_frame['content']:
+    labels = []
+    data_frame = pd.read_csv(filename, delimiter='|', header=None, names=['topic', 'content', 'label'], nrows=100)
+    for i, doc in enumerate(data_frame['content']):
         if isinstance(doc, float):
+            print i, '-th unkown doc: ', doc
             continue
         docs.append(tokenize_text(doc))
+        label.append(data_frame['label'])
     # import ipdb; ipdb.set_trace()  
-    return docs, data_frame['label']
+    return docs, np.array(labels)
 
 
 def main():
