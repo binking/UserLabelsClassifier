@@ -9,7 +9,7 @@ import string
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_matrix, lil_matrix
 # from matplotlib import pyplot as plt
 from sklearn.naive_bayes import (
 	GaussianNB,
@@ -55,7 +55,6 @@ def format_bow_csr_matrix(docs):
         indptr.append(len(indices))  # len(indices) means hwo many nnz in the col
     tf_csr_matrix = csr_matrix( (data, indices, indptr), dtype=int)
     idf_vector = np.array([freq for _, freq in sorted(idf_index2freq.items(), key=lambda x:x[0])])
-    print idf_vector
     return tf_csr_matrix, idf_vector
 
 
@@ -65,13 +64,14 @@ def load_tokens_from_file(filename):
     # <class 'pandas.core.frame.DataFrame'>
     # <class 'pandas.core.series.Series'> to <type 'numpy.ndarray'> : labels.values
     labels = []
-    data_frame = pd.read_csv(filename, delimiter=',', nrows=1000)
-    for i, doc in enumerate(data_frame['content']):
+    data_frame = pd.read_csv(filename, delimiter=',', nrows=3000)  # sample the whole: df.sample(frac=1)
+    random_frame = data_frame.reindex(np.random.permutation(data_frame.index))
+    for i, doc in enumerate(random_frame['content']):
         if isinstance(doc, float):
             print i, '-th unkown doc: ', doc
             continue
         docs.append(tokenize_text(doc))
-        labels.append(data_frame['class'][i])
+        labels.append(random_frame['class'][i])
     # import ipdb; ipdb.set_trace()  
     return docs, np.array(labels)
 
@@ -80,11 +80,17 @@ def main():
     load_time = time.time()
     # Preprocess text and generte csr matrix
     documents, labels = load_tokens_from_file('topic_classifier_simple_dataset.csv')
-    term_freq, idf_vector = format_bow_csr_matrix(documents)
-    td_idf_matrix = term_freq.dot(1/(1.0+idf_vector))
-    size, dims = td_idf_matrix.shape
-    train_set = td_idf_matrix[:int(0.8*size), :]  # slice sparse matrix: csc[:,indices], csr[indices,:]
-    train_label = labels[:int(0.8*size)]
+    term_freq, df_vector = format_bow_csr_matrix(documents)
+    size, dims = term_freq.shape
+    idf_vector = 1.0/(1+df_vector)
+    idf_matrix = lil_matrix((dims, dims))
+    idf_matrix.setdiag(idf_vector)
+    # import ipdb; ipdb.set_trace()
+    # raise Exception('Stop')
+    split_line = int(0.8*size)
+    td_idf_matrix = term_freq * idf_matrix
+    train_set = td_idf_matrix[:split_line, :]  # slice sparse matrix: csc[:,indices], csr[indices,:]
+    train_label = labels[:split_line]
     train_time = time.time()
     print '\nPreprocess cost %d seconds' % (train_time - load_time)
 
@@ -94,14 +100,14 @@ def main():
     prediction = mnb_model.predict(train_set)  # predict need dense matrix
     accuracy = np.sum(prediction==train_label)*1.0 / len(train_label)
     print "Accuracy is %f " % accuracy
-    print '\nTrain data spent %d seconds' % (time.time() - train_time)
+    print 'Train data spent %d seconds' % (time.time() - train_time)
 
     # Test model
-    test_set = td_idf_matrix[int(0.8*size):, :]
-    test_labels = labels[int(0.8*size):]
+    test_set = td_idf_matrix[split_line:, :]
+    test_labels = labels[split_line:]
     test_pred = mnb_model.predict(test_set)
     test_accuracy = np.sum(test_pred == test_labels)*1.0 / len(test_labels)
-    print 'Test set accuracy: %f' % test_accuracy
+    print '\nTest set accuracy: %f' % test_accuracy
 
 
 if __name__=='__main__':
