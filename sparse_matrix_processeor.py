@@ -103,7 +103,8 @@ def main():
     prediction = mnb_model.predict(train_set)  # predict need dense matrix
     accuracy = np.sum(prediction==train_label)*1.0 / len(train_label)
     print "Accuracy is %f " % accuracy
-    print 'Train data spent %d seconds' % (time.time() - train_time)
+    test_time = time.time()
+    print 'Train data spent %d seconds' % (test_time - train_time)
 
     # Test model
     test_set = td_idf_matrix[split_line:, :]
@@ -112,7 +113,9 @@ def main():
     import ipdb; ipdb.set_trace()
     test_accuracy = np.sum(test_pred == test_labels)*1.0 / len(test_labels)
     print '\nTest set accuracy: %f' % test_accuracy
-
+    end_time = time.time()
+    print 'Test data spent %d seconds' % (end_time - test_time)
+    print '*'*10, 'Totally cost: %d seconds' % (end_time - load_time), '*'*10
 
 if __name__=='__main__':
     main()
