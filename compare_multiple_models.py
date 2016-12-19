@@ -82,7 +82,7 @@ def load_tokens_from_file(filename):
 
 def give_me_classifier(X_train, y_train, X_test, y_test, clf):
     print '_' * 80
-    print "Training with %s : " % clf.__name__
+    print "Training with %s : " % clf
     t0 = time()
     clf.fit(X_train, y_train)
     train_pred = clf.predict(X_train)
