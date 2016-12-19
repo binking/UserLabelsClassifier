@@ -130,7 +130,7 @@ def main():
         (MultinomialNB(alpha=0.2), "Multinomial Navive Bayes(alpha=0.2)"),
         (MultinomialNB(alpha=0.4), "Multinomial Navive Bayes(alpha=0.4)"),
         (MultinomialNB(alpha=0.6), "Multinomial Navive Bayes(alpha=0.6)"),
-        (MultinomialNB(alpha=0.8), "Multinomial Navive Bayes(alpha=0.8)")
+        (MultinomialNB(alpha=0.8), "Multinomial Navive Bayes(alpha=0.8)"),
         (MultinomialNB(), "Multinomial Navive Bayes(alpha=1,default)"),
         (LogisticRegression(), "Logistic regression(L2 penalty)"),
         (LogisticRegression(penalty='l1'), "Logistic regression(L1 penalty)"),
