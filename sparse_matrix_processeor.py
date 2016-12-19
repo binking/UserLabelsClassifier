@@ -64,14 +64,16 @@ def load_tokens_from_file(filename):
     # <class 'pandas.core.frame.DataFrame'>
     # <class 'pandas.core.series.Series'> to <type 'numpy.ndarray'> : labels.values
     labels = []
-    data_frame = pd.read_csv(filename, delimiter=',', nrows=3000)  # sample the whole: df.sample(frac=1)
+    data_frame = pd.read_csv(filename, delimiter=',')  # sample the whole: df.sample(frac=1)
     random_frame = data_frame.reindex(np.random.permutation(data_frame.index))
     for i, doc in enumerate(random_frame['content']):
-        if isinstance(doc, float):
-            print i, '-th unkown doc: ', doc
+        if isinstance(doc, float) and random_frame['class'][i] == '其他'.decode('utf8'):
+            print i, '-th doc ignored'
             continue
         docs.append(tokenize_text(doc))
         labels.append(random_frame['class'][i])
+        if i > 2000:
+            break
     # import ipdb; ipdb.set_trace()  
     return docs, np.array(labels)
 
@@ -79,9 +81,10 @@ def load_tokens_from_file(filename):
 def main():
     load_time = time.time()
     # Preprocess text and generte csr matrix
-    documents, labels = load_tokens_from_file('topic_classifier_simple_dataset.csv')
+    documents, test_labels = load_tokens_from_file('topic_classifier_simple_dataset.csv')
     term_freq, df_vector = format_bow_csr_matrix(documents)
     size, dims = term_freq.shape
+    print 'Scale: ', size, dims
     idf_vector = 1.0/(1+df_vector)
     idf_matrix = lil_matrix((dims, dims))
     idf_matrix.setdiag(idf_vector)
@@ -106,6 +109,7 @@ def main():
     test_set = td_idf_matrix[split_line:, :]
     test_labels = labels[split_line:]
     test_pred = mnb_model.predict(test_set)
+    import ipdb; ipdb.set_trace()
     test_accuracy = np.sum(test_pred == test_labels)*1.0 / len(test_labels)
     print '\nTest set accuracy: %f' % test_accuracy
 
