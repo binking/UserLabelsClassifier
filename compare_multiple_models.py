@@ -6,6 +6,7 @@
 import time
 import jieba
 import string
+import traceback
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
@@ -15,6 +16,7 @@ from sklearn.naive_bayes import (
 	GaussianNB,
 	MultinomialNB
 )
+from sklearn.linear_model import LogisticRegression
 
 def load_sparse_csr(filename):
     loader = np.load(filename)  # What is npz 
@@ -72,50 +74,78 @@ def load_tokens_from_file(filename):
             continue
         docs.append(tokenize_text(doc))
         labels.append(random_frame['class'][i])
-        if i > 10000:
+        if i > 999:
             break
     # import ipdb; ipdb.set_trace()  
     return docs, np.array(labels)
+
+
+def give_me_classifier(X_train, y_train, X_test, y_test, clf):
+    print '_' * 80
+    print "Training with %s : " % clf.__name__
+    t0 = time()
+    clf.fit(X_train, y_train)
+    train_pred = clf.predict(X_train)
+    train_acc = np.sum(y_train==train_pred)*1.0 / len(train_pred)
+    print 'Train Accuracy is %2.3f' % (train_acc * 100)
+    train_time = time() - t0
+    print "train time: %0.3fs" % train_time 
+
+    t0 = time()
+    test_pred = clf.predict(X_test)
+    test_acc = np.sum(y_test==test_pred)*1.0 / len(test_pred)
+    print "Test Accuracy is %2.3f" % (test_acc * 100)
+    test_time = time() - t0
+    print "test time:  %0.3fs" % test_time
+
+    return clf_descr, train_acc, test_acc, train_time, test_time
 
 
 def main():
     load_time = time.time()
     # Preprocess text and generte csr matrix
     documents, labels = load_tokens_from_file('topic_classifier_simple_dataset.csv')
-    term_freq, df_vector = format_bow_csr_matrix(documents)
+    try:
+        term_freq, df_vector = format_bow_csr_matrix(documents)
+    except MemoryError as e:
+        traceback.print_exc()
+        return -1
     size, dims = term_freq.shape
     print 'Scale: ', size, dims
     idf_vector = 1.0/(1+df_vector)
     idf_matrix = lil_matrix((dims, dims))
     idf_matrix.setdiag(idf_vector)
-    # import ipdb; ipdb.set_trace()
-    # raise auto_examplesxception('Stop')
-    split_line = int(0.8*size)
     td_idf_matrix = term_freq * idf_matrix
+    # split dataset into 2 parts with rate of 8:2
+    split_line = int(0.8*size)
     train_set = td_idf_matrix[:split_line, :]  # slice sparse matrix: csc[:,indices], csr[indices,:]
     train_label = labels[:split_line]
+    test_set = td_idf_matrix[split_line:, :]
+    test_labels = labels[split_line:]
     train_time = time.time()
     print '\nPreprocess cost %d seconds' % (train_time - load_time)
 
-    # Train model
-    mnb_model = MultinomialNB()
-    mnb_model.fit(train_set, train_label)
-    prediction = mnb_model.predict(train_set)  # predict need dense matrix
-    accuracy = np.sum(prediction==train_label)*1.0 / len(train_label)
-    print "Accuracy is %f " % accuracy
-    test_time = time.time()
-    print 'Train data spent %d seconds' % (test_time - train_time)
-
-    # Test model
-    test_set = td_idf_matrix[split_line:, :]
-    test_labels = labels[split_line:]
-    test_pred = mnb_model.predict(test_set)
-    # import ipdb; ipdb.set_trace()
-    test_accuracy = np.sum(test_pred == test_labels)*1.0 / len(test_labels)
-    print '\nTest set accuracy: %f' % test_accuracy
-    end_time = time.time()
-    print 'Test data spent %d seconds' % (end_time - test_time)
-    print '*'*10, 'Totally cost: %d seconds' % (end_time - load_time), '*'*10
+    results = []
+    for clf, name in (
+        (MultinomialNB(alpha=0.2), "Multinomial Navive Bayes(alpha=0.2)"),
+        (MultinomialNB(alpha=0.4), "Multinomial Navive Bayes(alpha=0.4)"),
+        (MultinomialNB(alpha=0.6), "Multinomial Navive Bayes(alpha=0.6)"),
+        (MultinomialNB(alpha=0.8), "Multinomial Navive Bayes(alpha=0.8)")
+        (MultinomialNB(), "Multinomial Navive Bayes(alpha=1,default)"),
+        (LogisticRegression(), "Logistic regression(L2 penalty)"),
+        (LogisticRegression(penalty='l1'), "Logistic regression(L1 penalty)"),
+        (LogisticRegression(C=1., solver='lbfgs'), "Logistic regression with no calibration as baseline")
+        # (KNeighborsClassifier(n_neighbors=10), "kNN"),
+        # (RandomForestClassifier(n_estimators=100), "Random forest")
+        )[:2]:
+        print('=' * 80)
+        print(name)
+        results.append(benchmark(clf))
+    print "=" * 80
+    for res in results:
+        print 'Classifier: %s, its train accuracy = %2.3f, test accuracy = %2.3f' % res[0], res[1], res[2]
+        print 'And it cost %f for training and cost %f for testing' % (res[3], res[4])
+    
 
 if __name__=='__main__':
     main()
