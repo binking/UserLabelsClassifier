@@ -72,7 +72,7 @@ def load_tokens_from_file(filename):
             continue
         docs.append(tokenize_text(doc))
         labels.append(random_frame['class'][i])
-        if i > 2000:
+        if i > 1000:
             break
     # import ipdb; ipdb.set_trace()  
     return docs, np.array(labels)
@@ -81,7 +81,7 @@ def load_tokens_from_file(filename):
 def main():
     load_time = time.time()
     # Preprocess text and generte csr matrix
-    documents, test_labels = load_tokens_from_file('topic_classifier_simple_dataset.csv')
+    documents, labels = load_tokens_from_file('topic_classifier_simple_dataset.csv')
     term_freq, df_vector = format_bow_csr_matrix(documents)
     size, dims = term_freq.shape
     print 'Scale: ', size, dims
@@ -89,7 +89,7 @@ def main():
     idf_matrix = lil_matrix((dims, dims))
     idf_matrix.setdiag(idf_vector)
     # import ipdb; ipdb.set_trace()
-    # raise Exception('Stop')
+    # raise auto_examplesxception('Stop')
     split_line = int(0.8*size)
     td_idf_matrix = term_freq * idf_matrix
     train_set = td_idf_matrix[:split_line, :]  # slice sparse matrix: csc[:,indices], csr[indices,:]
