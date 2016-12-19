@@ -64,7 +64,7 @@ def load_tokens_from_file(filename):
     # <class 'pandas.core.frame.DataFrame'>
     # <class 'pandas.core.series.Series'> to <type 'numpy.ndarray'> : labels.values
     labels = []
-    data_frame = pd.read_csv(filename, delimiter=',')  # sample the whole: df.sample(frac=1)
+    data_frame = pd.read_csv(filename, delimiter=',', nrows=3000)  # sample the whole: df.sample(frac=1)
     random_frame = data_frame.reindex(np.random.permutation(data_frame.index))
     for i, doc in enumerate(random_frame['content']):
         if isinstance(doc, float) and random_frame['class'][i] == '其他'.decode('utf8'):
