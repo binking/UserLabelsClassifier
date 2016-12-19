@@ -110,7 +110,7 @@ def main():
     test_set = td_idf_matrix[split_line:, :]
     test_labels = labels[split_line:]
     test_pred = mnb_model.predict(test_set)
-    import ipdb; ipdb.set_trace()
+    # import ipdb; ipdb.set_trace()
     test_accuracy = np.sum(test_pred == test_labels)*1.0 / len(test_labels)
     print '\nTest set accuracy: %f' % test_accuracy
     end_time = time.time()
