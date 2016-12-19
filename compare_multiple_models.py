@@ -83,22 +83,26 @@ def load_tokens_from_file(filename):
 def give_me_classifier(X_train, y_train, X_test, y_test, clf):
     print '_' * 80
     print "Training with %s : " % clf
-    t0 = time.time()
-    clf.fit(X_train, y_train)
-    train_pred = clf.predict(X_train)
-    train_acc = np.sum(y_train==train_pred)*1.0 / len(train_pred)
-    print 'Train Accuracy is %2.3f' % (train_acc * 100)
-    train_time = time.time() - t0
-    print "train time: %0.3fs" % train_time 
+    try:
+        t0 = time.time()
+        clf.fit(X_train, y_train)
+        train_pred = clf.predict(X_train)
+        train_acc = np.sum(y_train==train_pred)*1.0 / len(train_pred)
+        print 'Train Accuracy is %2.3f%' % (train_acc * 100)
+        train_time = time.time() - t0
+        print "train time: %0.3fs" % train_time 
 
-    t0 = time.time()
-    test_pred = clf.predict(X_test)
-    test_acc = np.sum(y_test==test_pred)*1.0 / len(test_pred)
-    print "Test Accuracy is %2.3f" % (test_acc * 100)
-    test_time = time.time() - t0
-    print "test time:  %0.3fs" % test_time
+        t0 = time.time()
+        test_pred = clf.predict(X_test)
+        test_acc = np.sum(y_test==test_pred)*1.0 / len(test_pred)
+        print "Test Accuracy is %2.3f%" % (test_acc * 100)
+        test_time = time.time() - t0
+        print "test time:  %0.3fs" % test_time
 
-    return '%s' % clf, train_acc, test_acc, train_time, test_time
+        return '%s' % clf, train_acc, test_acc, train_time, test_time
+    except Exception as e:
+        traceback.print_exc()
+        return False
 
 
 def main():
@@ -143,8 +147,9 @@ def main():
         results.append(give_me_classifier(train_set, train_label, test_set, test_labels, clf))
     print "=" * 80
     for res in results:
-        print 'Classifier: %s, its train accuracy = %2.3f, test accuracy = %2.3f' % res[0], res[1], res[2]
-        print 'And it cost %f for training and cost %f for testing.' % (res[3], res[4])
+        if res:
+            print 'Classifier: %s, its train accuracy = %2.3f%, test accuracy = %2.3f%' % (res[0], res[1], res[2])
+            print 'And it cost %f for training and cost %f for testing.' % (res[3], res[4])
     
 
 if __name__=='__main__':
