@@ -111,6 +111,7 @@ def main():
     documents, labels = load_tokens_from_file('topic_classifier_simple_dataset.csv')
     try:
         term_freq, df_vector = format_bow_csr_matrix(documents)
+        del documents
     except MemoryError as e:
         traceback.print_exc()
         return -1
@@ -126,6 +127,8 @@ def main():
     train_label = labels[:split_line]
     test_set = td_idf_matrix[split_line:, :]
     test_labels = labels[split_line:]
+    del term_freq
+    del td_idf_matrix
     train_time = time.time()
     print '\nPreprocess cost %d seconds' % (train_time - load_time)
 
