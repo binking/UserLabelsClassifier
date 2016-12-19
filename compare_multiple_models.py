@@ -88,14 +88,14 @@ def give_me_classifier(X_train, y_train, X_test, y_test, clf):
         clf.fit(X_train, y_train)
         train_pred = clf.predict(X_train)
         train_acc = np.sum(y_train==train_pred)*1.0 / len(train_pred)
-        print 'Train Accuracy is %2.3f%' % (train_acc * 100)
+        print 'Train Accuracy is %2.3f' % (train_acc * 100)
         train_time = time.time() - t0
         print "train time: %0.3fs" % train_time 
 
         t0 = time.time()
         test_pred = clf.predict(X_test)
         test_acc = np.sum(y_test==test_pred)*1.0 / len(test_pred)
-        print "Test Accuracy is %2.3f%" % (test_acc * 100)
+        print "Test Accuracy is %2.3f" % (test_acc * 100)
         test_time = time.time() - t0
         print "test time:  %0.3fs" % test_time
 
@@ -148,7 +148,7 @@ def main():
     print "=" * 80
     for res in results:
         if res:
-            print 'Classifier: %s, its train accuracy = %2.3f%, test accuracy = %2.3f%' % (res[0], res[1], res[2])
+            print 'Classifier: %s, its train accuracy = %2.3f, test accuracy = %2.3f' % (res[0], res[1], res[2])
             print 'And it cost %f for training and cost %f for testing.' % (res[3], res[4])
     
 
