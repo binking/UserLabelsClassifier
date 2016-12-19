@@ -74,7 +74,7 @@ def load_tokens_from_file(filename):
             continue
         docs.append(tokenize_text(doc))
         labels.append(random_frame['class'][i])
-        if i > 999:
+        if i > 9999:
             break
     # import ipdb; ipdb.set_trace()  
     return docs, np.array(labels)
