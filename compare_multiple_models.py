@@ -140,7 +140,7 @@ def main():
         )[:2]:
         print('=' * 80)
         print(name)
-        results.append(give_me_classifier(clf))
+        results.append(give_me_classifier(clf, train_set, train_label, test_set, test_labels))
     print "=" * 80
     for res in results:
         print 'Classifier: %s, its train accuracy = %2.3f, test accuracy = %2.3f' % res[0], res[1], res[2]
