@@ -98,7 +98,7 @@ def give_me_classifier(X_train, y_train, X_test, y_test, clf):
     test_time = time.time() - t0
     print "test time:  %0.3fs" % test_time
 
-    return clf_descr, train_acc, test_acc, train_time, test_time
+    return '%s' % clf, train_acc, test_acc, train_time, test_time
 
 
 def main():
@@ -137,7 +137,7 @@ def main():
         (LogisticRegression(C=1., solver='lbfgs'), "Logistic regression with no calibration as baseline")
         # (KNeighborsClassifier(n_neighbors=10), "kNN"),
         # (RandomForestClassifier(n_estimators=100), "Random forest")
-        )[:2]:
+        ):
         print('=' * 80)
         print(name)
         results.append(give_me_classifier(train_set, train_label, test_set, test_labels, clf))
