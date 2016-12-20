@@ -4,6 +4,7 @@
 #        http://scikit-learn.org/stable/auto_examples/text/document_classification_20newsgroups.html
 #  2. 
 import time
+import json
 import jieba
 import string
 import traceback
@@ -18,6 +19,8 @@ from sklearn.naive_bayes import (
 	MultinomialNB
 )
 from sklearn.linear_model import LogisticRegression
+
+stopwords = json.load(open('stop_words.json', 'r'))
 
 def load_sparse_csr(filename):
     loader = np.load(filename)  # What is npz 
@@ -38,7 +41,8 @@ def tokenize_text(text, cut_mode=True):
     for sentence in text.split(','):
         for token in jieba.cut(sentence, cut_all=cut_mode):
             token = token.strip()
-            if token not in string.punctuation:
+            if token not in string.punctuation \
+            and token not in stopwords:  # remove punctuation and topwords
                 tokens.append(token)
     return tokens
 
