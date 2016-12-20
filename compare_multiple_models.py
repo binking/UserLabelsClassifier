@@ -81,7 +81,7 @@ def load_tokens_from_file(filename):
         labels.append(random_frame['class'][i])
         # if i > 9999:
         #     break
-    import ipdb; ipdb.set_trace()  
+    # import ipdb; ipdb.set_trace()  
     return docs, np.array(labels)
 
 
