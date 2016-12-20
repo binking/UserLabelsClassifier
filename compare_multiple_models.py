@@ -12,6 +12,7 @@ import pandas as pd
 from pandas import DataFrame
 from scipy.sparse import csr_matrix, lil_matrix
 # from matplotlib import pyplot as plt
+from sklearn.neural_network import MLPClassifier
 from sklearn.naive_bayes import (
 	GaussianNB,
 	MultinomialNB
@@ -48,7 +49,6 @@ def format_bow_csr_matrix(docs):
     data = []; indices = []; indptr = [0]
     idf_index2freq = {}
     for doc in docs:
-        # print 'Cooking text'
         for token in doc:
             index = index2word.setdefault(token, len(index2word))  # how many words in vocabulary
             idf_index2freq[index] = idf_index2freq.get(index, 0) + 1
@@ -77,7 +77,7 @@ def load_tokens_from_file(filename):
         labels.append(random_frame['class'][i])
         # if i > 9999:
         #     break
-    # import ipdb; ipdb.set_trace()  
+    import ipdb; ipdb.set_trace()  
     return docs, np.array(labels)
 
 
@@ -143,7 +143,7 @@ def main():
         (LogisticRegression(), "Logistic regression(L2 penalty)"),
         (LogisticRegression(penalty='l1'), "Logistic regression(L1 penalty)"),
         (LogisticRegression(C=1., solver='lbfgs'), "Logistic regression with no calibration as baseline")
-        # (KNeighborsClassifier(n_neighbors=10), "kNN"),
+        (MLPClassifier(solver='lbgfs', alpha=1e-5, hidden_layer_sizes=(5,2), random_rate=1), "Five Layer Perceptron")
         # (RandomForestClassifier(n_estimators=100), "Random forest")
         ):
         print('=' * 80)
