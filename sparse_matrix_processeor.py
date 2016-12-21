@@ -42,7 +42,7 @@ def tokenize_text(text, cut_mode=True):
 
 def bow_counter2csr_matrix(docs):
     index2word = {}
-    print 'Format sparse matrix (Many:One) ...'
+    # print 'Format sparse matrix (Many:One) ...'
     idf_index2freq = {}
     data = []; indices = []; indptr = [0]
     for doc in docs:
@@ -54,7 +54,7 @@ def bow_counter2csr_matrix(docs):
             indices.append(index)
             data.append(freq_dict[word])
         indptr.append(len(indices))
-    print index2word
+    # print index2word
     tf_csr_matrix = csr_matrix( (data, indices, indptr), dtype=int)
     idf_vector = np.array([freq for _, freq in sorted(idf_index2freq.items(), key=lambda x:x[0])])
     return tf_csr_matrix, idf_vector
@@ -62,16 +62,19 @@ def bow_counter2csr_matrix(docs):
 
 def format_bow_csr_matrix(docs):
     index2word = {}
-    print 'Format sparse matrix (1:1) ...'
+    # print 'Format sparse matrix (1:1) ...'
     data = []; indices = []; indptr = [0]
-    idf_index2freq = {}
+    idf_index2freq = Counter()
     for doc in docs:
         # print 'Cooking text'
+        df_temp = {}
         for token in doc:
             index = index2word.setdefault(token, len(index2word))  # how many words in vocabulary
-            idf_index2freq[index] = idf_index2freq.get(index, 0) + 1
+            # idf_index2freq[index] = idf_index2freq.get(index, 0) + 1
+            df_temp[index] = 1
             indices.append(index)
             data.append(1)
+        idf_index2freq.update(df_temp)
         indptr.append(len(indices))  # len(indices) means hwo many nnz in the col
     tf_csr_matrix = csr_matrix( (data, indices, indptr), dtype=int)
     idf_vector = np.array([freq for _, freq in sorted(idf_index2freq.items(), key=lambda x:x[0])])
@@ -84,15 +87,15 @@ def load_tokens_from_file(filename):
     # <class 'pandas.core.frame.DataFrame'>
     # <class 'pandas.core.series.Series'> to <type 'numpy.ndarray'> : labels.values
     labels = []
-    data_frame = pd.read_csv(filename, delimiter=',') # , nrows=5000)  # sample the whole: df.sample(frac=1)
+    data_frame = pd.read_csv(filename, delimiter=',', nrows=2000)  # sample the whole: df.sample(frac=1)
     random_frame = data_frame.reindex(np.random.permutation(data_frame.index))
     for i, doc in enumerate(random_frame['content']):
         if isinstance(doc, float) and random_frame['class'][i] == '其他'.decode('utf8'):
-            print i, '-th doc ignored'
+            # print i, '-th doc ignored'
             continue
         docs.append(tokenize_text(doc))
         labels.append(random_frame['class'][i])
-        if i > 10000:
+        if i > 999:
             break
     # import ipdb; ipdb.set_trace()  
     return docs, np.array(labels)
@@ -101,7 +104,7 @@ def load_tokens_from_file(filename):
 def main():
     load_time = time.time()
     # Preprocess text and generte csr matrix
-    documents, labels = load_tokens_from_file('topic_classifier_simple_dataset.csv')
+    documents, labels = load_tokens_from_file('user_labels_simple_dataset.csv')
     term_freq, df_vector = format_bow_csr_matrix(documents)
     size, dims = term_freq.shape
     print 'Scale: ', size, dims
@@ -138,10 +141,25 @@ def main():
     print '*'*10, 'Totally cost: %d seconds' % (end_time - load_time), '*'*10
 
 def test():
-    test_docs = [["I","am", "I"], ["You", "are", "You"], ["He", "is", "He"]]
-    test_tf, test_df = bow_counter2csr_matrix(test_docs)
-    print test_tf.todense()
-    print test_df.flatten()
+    test_docs = [
+        ["I","am", "I"], ["You", "are", "You"], 
+        ["He", "is", "He"], ["I", "am", "not", "You"],
+        ["You", "also", "not", "I"],
+        ["He", "never", "is", "You"]]
+    documents, labels = load_tokens_from_file('topic_classifier_simple_dataset.csv')
+    t1 = time.time()
+    for _ in range(10):
+        test_tf, test_df = bow_counter2csr_matrix(documents)
+    print "1st, time cost ", time.time() - t1
+    # print test_tf.todense()
+    # print test_df.flatten()
+    print '='*40
+    t2 = time.time()
+    for _ in range(10):
+        test_tf, test_df = format_bow_csr_matrix(documents)
+    print "2nd, time cost ", time.time() - t2
+    # print test_tf.todense()
+    # print test_df.flatten()
 
 if __name__=='__main__':
     # main()
