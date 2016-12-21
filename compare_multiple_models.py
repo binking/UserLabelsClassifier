@@ -147,7 +147,7 @@ def main():
         (LogisticRegression(), "Logistic regression(L2 penalty)"),
         (LogisticRegression(penalty='l1'), "Logistic regression(L1 penalty)"),
         (LogisticRegression(C=1., solver='lbfgs'), "Logistic regression with no calibration as baseline"),
-        (MLPClassifier(solver='lbgfs', alpha=1e-5, hidden_layer_sizes=(5,2), random_state=1), "Five Layer Perceptron")
+        (MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5,2), random_state=1), "Five Layer Perceptron")
         # (RandomForestClassifier(n_estimators=100), "Random forest")
         ):
         print('=' * 80)

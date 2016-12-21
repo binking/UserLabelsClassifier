@@ -8,6 +8,7 @@ import jieba
 import string
 import numpy as np
 import pandas as pd
+from collections import Counter
 from pandas import DataFrame
 from scipy.sparse import csr_matrix, lil_matrix
 # from matplotlib import pyplot as plt
@@ -39,10 +40,29 @@ def tokenize_text(text, cut_mode=True):
                 tokens.append(token)
     return tokens
 
+def bow_counter2csr_matrix(docs):
+    index2word = {}
+    print 'Format sparse matrix (Many:One) ...'
+    idf_index2freq = {}
+    data = []; indices = []; indptr = [0]
+    for doc in docs:
+        # import ipdb; ipdb.set_trace()
+        freq_dict = Counter(doc)
+        for word in freq_dict:  # {'word': freq, }
+            index = index2word.setdefault(word, len(index2word))
+            idf_index2freq[index] = idf_index2freq.get(index, 0) + 1
+            indices.append(index)
+            data.append(freq_dict[word])
+        indptr.append(len(indices))
+    print index2word
+    tf_csr_matrix = csr_matrix( (data, indices, indptr), dtype=int)
+    idf_vector = np.array([freq for _, freq in sorted(idf_index2freq.items(), key=lambda x:x[0])])
+    return tf_csr_matrix, idf_vector
+
 
 def format_bow_csr_matrix(docs):
     index2word = {}
-    print 'Format sparse matrix ...'
+    print 'Format sparse matrix (1:1) ...'
     data = []; indices = []; indptr = [0]
     idf_index2freq = {}
     for doc in docs:
@@ -117,5 +137,12 @@ def main():
     print 'Test data spent %d seconds' % (end_time - test_time)
     print '*'*10, 'Totally cost: %d seconds' % (end_time - load_time), '*'*10
 
+def test():
+    test_docs = [["I","am", "I"], ["You", "are", "You"], ["He", "is", "He"]]
+    test_tf, test_df = bow_counter2csr_matrix(test_docs)
+    print test_tf.todense()
+    print test_df.flatten()
+
 if __name__=='__main__':
-    main()
+    # main()
+    test()
